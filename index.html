@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>StakeStone 空投查询</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 30px; }
+    textarea { width: 100%; height: 160px; margin-bottom: 10px; }
+    button {
+      padding: 10px 20px; background: #4caf50; color: white; border: none;
+      border-radius: 5px; cursor: pointer;
+    }
+    button:hover { background: #388e3c; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+  <h2>StakeStone 批量查询空投资格</h2>
+  <p>每行输入一个钱包地址：</p>
+  <textarea id="input"></textarea>
+  <button onclick="check()">开始查询</button>
+
+  <table id="resultTable" style="display:none;">
+    <thead>
+      <tr><th>序号</th><th>地址</th><th>是否符合空投</th><th>是否大户</th></tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+
+  <script>
+    async function check() {
+      const input = document.getElementById("input").value.trim();
+      const addresses = input.split("\n").map(x => x.trim()).filter(Boolean);
+      if (addresses.length === 0) return alert("请输入地址");
+
+      const url = `https://your-vercel-app-name.vercel.app/api/check-stake?addresses=${addresses.join(',')}`;
+      const res = await fetch(url);
+      const json = await res.json();
+
+      const tbody = document.getElementById("resultBody");
+      tbody.innerHTML = "";
+      addresses.forEach((addr, i) => {
+        const data = json.results[addr];
+        const qualified = data?.tokenQualified === '1' ? "✅ 是" : "❌ 否";
+        const largeTrader = data?.isLargeTrader ? "✅ 是" : "❌ 否";
+        tbody.innerHTML += `<tr><td>${i + 1}</td><td>${addr}</td><td>${qualified}</td><td>${largeTrader}</td></tr>`;
+      });
+
+      document.getElementById("resultTable").style.display = "table";
+    }
+  </script>
+
+</body>
+</html>
