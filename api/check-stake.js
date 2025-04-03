@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   for (const addr of list) {
     try {
       const apiUrl = `https://airdrop.stakestone.io/backend/airdrop/credentials?walletAddress=${addr}`;
-      const response = await fetch(apiUrl);  // ✅ 直接用内置 fetch，不引入 node-fetch
+      const response = await fetch(apiUrl); // ✅ 原生 fetch，无需引入 node-fetch
       const data = await response.json();
       results[addr] = data;
     } catch (error) {
