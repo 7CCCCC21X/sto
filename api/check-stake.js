@@ -1,7 +1,9 @@
 export default async function handler(req, res) {
   const { addresses } = req.query;
 
-  if (!addresses) return res.status(400).json({ error: 'Missing addresses' });
+  if (!addresses) {
+    return res.status(400).json({ error: 'Missing addresses' });
+  }
 
   const list = addresses.split(',').map(a => a.trim()).filter(Boolean);
   const results = {};
@@ -9,7 +11,7 @@ export default async function handler(req, res) {
   for (const addr of list) {
     try {
       const apiUrl = `https://airdrop.stakestone.io/backend/airdrop/credentials?walletAddress=${addr}`;
-      const response = await fetch(apiUrl); // ✅ 原生 fetch，无需引入 node-fetch
+      const response = await fetch(apiUrl); // ✅ 原生 fetch，不需要 node-fetch
       const data = await response.json();
       results[addr] = data;
     } catch (error) {
