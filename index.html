@@ -36,7 +36,7 @@
       const addresses = input.split("\n").map(x => x.trim()).filter(Boolean);
       if (addresses.length === 0) return alert("请输入地址");
 
-      const url = `https://sto-j065r8d32-7ccccc21xs-projects.vercel.app/api/check-stake?addresses=${addresses.join(',')}`;
+      const url = `https://sto-avp85vpx0-7ccccc21xs-projects.vercel.app/api/check-stake?addresses=${addresses.join(',')}`;
       const res = await fetch(url);
       const json = await res.json();
 
@@ -46,7 +46,8 @@
         const data = json.results[addr];
         const qualified = data?.tokenQualified === '1' ? "✅ 是" : "❌ 否";
         const largeTrader = data?.isLargeTrader ? "✅ 是" : "❌ 否";
-        tbody.innerHTML += `<tr><td>${i + 1}</td><td>${addr}</td><td>${qualified}</td><td>${largeTrader}</td></tr>`;
+        const row = `<tr><td>${i + 1}</td><td>${addr}</td><td>${qualified}</td><td>${largeTrader}</td></tr>`;
+        tbody.innerHTML += row;
       });
 
       document.getElementById("resultTable").style.display = "table";
