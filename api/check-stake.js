@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const { addresses } = req.query;
 
-  // 解决 CORS 跨域
+  // 允许跨域访问
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   for (const addr of list) {
     try {
       const apiUrl = `https://airdrop.stakestone.io/backend/airdrop/credentials?walletAddress=${addr}`;
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl); // ✅ Node 18 原生 fetch
       const data = await response.json();
       results[addr] = data;
     } catch (error) {
@@ -24,5 +24,5 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ results });
+  return res.status(200).json({ results });
 }
