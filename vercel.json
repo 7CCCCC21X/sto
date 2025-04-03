@@ -11,13 +11,7 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/check-stake",
-      "dest": "api/check-stake.js"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
+    { "src": "/api/check-stake", "dest": "api/check-stake.js" },
+    { "src": "/", "dest": "/index.html" }
   ]
 }
