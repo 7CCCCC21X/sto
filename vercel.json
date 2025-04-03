@@ -1,5 +1,15 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/check-stake.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/check-stake",
+      "dest": "api/check-stake.js"
+    }
   ]
 }
