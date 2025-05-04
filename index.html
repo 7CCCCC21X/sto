@@ -1,62 +1,80 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <title>StakeStone 空投查询</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StakeStone 批量查询工具</title>
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 30px; }
-    textarea { width: 100%; height: 160px; margin-bottom: 10px; }
-    button {
-      padding: 10px 20px; background: #4caf50; color: white; border: none;
-      border-radius: 5px; cursor: pointer;
-    }
-    button:hover { background: #388e3c; }
+    body { font-family: sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    textarea { width: 100%; height: 150px; padding: 10px; font-size: 14px; }
+    button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
     table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
-    th { background: #f0f0f0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #007bff; color: white; }
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
-
-  <h2>StakeStone 批量查询空投资格</h2>
-  <p>每行输入一个钱包地址：</p>
-  <textarea id="input"></textarea>
-  <button onclick="check()">开始查询</button>
-
-  <table id="resultTable" style="display:none;">
-    <thead>
-      <tr><th>序号</th><th>地址</th><th>是否符合空投</th><th>是否大户</th></tr>
-    </thead>
-    <tbody id="resultBody"></tbody>
-  </table>
-
-  <script>
-    async function check() {
-      const input = document.getElementById("input").value.trim();
-      const addresses = input.split("\n").map(x => x.trim()).filter(Boolean);
-      if (addresses.length === 0) return alert("请输入地址");
-
-      const url = `https://sto-avp85vpx0-7ccccc21xs-projects.vercel.app/api/check-stake?addresses=${addresses.join(',')}`;
-      const res = await fetch(url);
-      const json = await res.json();
-
-      const tbody = document.getElementById("resultBody");
-      tbody.innerHTML = "";
-      addresses.forEach((addr, i) => {
-        const data = json.results[addr];
-        const qualified = data?.tokenQualified === '1' ? "✅ 是" : "❌ 否";
-        const largeTrader = data?.isLargeTrader ? "✅ 是" : "❌ 否";
-        const row = `<tr><td>${i + 1}</td><td>${addr}</td><td>${qualified}</td><td>${largeTrader}</td></tr>`;
-        tbody.innerHTML += row;
-      });
-
-      document.getElementById("resultTable").style.display = "table";
-    }
-  </script>
-
-  <div style="text-align:right;margin-top:30px;font-size:13px;">
-    作者推特：<a href="https://x.com/0xXIAOc" target="_blank">@0xXIAOc</a>
+  <div class="container">
+    <h1>StakeStone 批量资格查询</h1>
+    <textarea id="addressInput" placeholder="每行一个地址"></textarea>
+    <button onclick="query()">开始查询</button>
+    <div id="stats"></div>
+    <table id="resultTable" style="display:none">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>地址</th>
+          <th>是否符合资格</th>
+          <th>空投数量</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
   </div>
 
+  <script>
+    async function query() {
+      const input = document.getElementById('addressInput').value;
+      const addresses = [...new Set(input.split(/\s+/).filter(a => a.startsWith('0x') && a.length === 42))];
+      const table = document.getElementById('resultTable');
+      const tbody = document.getElementById('tableBody');
+      const stats = document.getElementById('stats');
+
+      tbody.innerHTML = '';
+      let qualifiedCount = 0, totalTokens = 0;
+
+      for (let i = 0; i < addresses.length; i++) {
+        const addr = addresses[i];
+        try {
+          const res = await fetch(`/api/proxy?url=${encodeURIComponent(`https://claims.stakestone.io/api/credentials?walletAddress=${addr}&batchId=0`)}`);
+          const json = await res.json();
+
+          const qualified = parseInt(json.tokenQualified) > 0;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${addr}</td>
+            <td class="${qualified ? 'green' : 'red'}">${qualified ? '✅ 是' : '❌ 否'}</td>
+            <td>${json.tokenQualified}</td>
+          `;
+          tbody.appendChild(tr);
+
+          if (qualified) {
+            qualifiedCount++;
+            totalTokens += parseInt(json.tokenQualified);
+          }
+        } catch (e) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${i + 1}</td><td colspan="3" style="color:red">${addr} 查询失败</td>`;
+          tbody.appendChild(tr);
+        }
+      }
+      table.style.display = '';
+      stats.innerHTML = `共 ${addresses.length} 个地址，符合资格 ${qualifiedCount} 个，合计空投：${totalTokens} Token`;
+    }
+  </script>
 </body>
 </html>
