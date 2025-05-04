@@ -1,11 +1,18 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/check-stake.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" }
+  "rewrites": [
+    {
+      "source": "/api/proxy",
+      "destination": "/api/proxy.js"
+    }
   ],
-  "routes": [
-    { "src": "/api/check-stake", "dest": "api/check-stake.js" },
-    { "src": "/", "dest": "/index.html" }
+  "headers": [
+    {
+      "source": "/api/proxy",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+      ]
+    }
   ]
 }
